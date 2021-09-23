@@ -1,6 +1,5 @@
 import os
 import numpy as np
-# just removed the random imports
 
 
 class Device:
@@ -8,9 +7,10 @@ class Device:
     def __init__(self):
         self.JVCurve = self.JVCurve
 
+    # note ill probably seperate this from the device class
     class JVCurve:
 
-        # define needed dictionaries and init variables
+        # initialize neccisary variables, make empty for now so that calling class is quick
         def __init__(self):
             
             #create ID (e.g. JV)
@@ -46,6 +46,7 @@ class Device:
             self.rch = None
             self.scalar = 0
             
+            #initialize all lists and dictionaries
             self.Variable = {}
             self.Name = {}
             self.Label = {}
@@ -54,13 +55,15 @@ class Device:
             self.vectorlist = []
             self.scalarlist = []
             
-
+        # gets neccisary list --> easy to create dummyfile of class and call this for other class organization while saving memory
         def createlists(self):
             
+            # list of all values loaded, all vectors calculated, and all scalars calculated
             self.loadedlist = ['v','j','i','area']
             self.vectorlist = ['p']
             self.scalarlist = ['pce', 'jsc', 'voc', 'ff', 'jmp', 'vmp', 'pmp', 'rs', 'rsh', 'rch']
             
+            # list of variables to caplital variables (good for short hand in UI)
             self.Variable = {'i': 'I',
                           'j': 'J',
                           'v': 'V',
@@ -77,6 +80,7 @@ class Device:
                           'rsh': 'Rsh',
                           'rch': 'Rch'}
             
+            # list of variables long hand names (good for long hand)
             self.Name = {'i': 'Current / I (mA)',
                          'j': 'Current Density / J (mA/cm²)',
                          'v': 'Voltage / V (V)',
@@ -93,6 +97,7 @@ class Device:
                          'rsh': 'Shunt Resistance / Rsh (Ω/cm²)',
                          'rch': 'Channel Resistance / Rch (Ω/cm²)'}
             
+            # the opposite on name, i think i could reogranize to remove this
             self.NameRev = {'Current / I (mA)' : 'i',
                             'Current Density / J (mA/cm²)' : 'j',
                             'Voltage / V (V)' : 'v',
@@ -108,7 +113,8 @@ class Device:
                             'Series Resistance / Rs (Ω/cm²)' : 'rs',
                             'Shunt Resistance / Rsh (Ω/cm²)' : 'rsh',
                             'Channel Resistance / Rch (Ω/cm²)': 'rch'}
-
+            
+            # labels for axis
             self.Label = {'i': 'I (mA)',
                           'j': 'J (mA/cm²)',
                           'v': 'V (V)',
@@ -125,6 +131,7 @@ class Device:
                           'rsh': 'Rsh (Ω/cm²)',
                           'rch': 'Rch (Ω/cm²)'}
             
+            # units -- unused for now but good to keep track of
             self.Unit = {'i': 'mA',
                          'j': 'mA/cm²',
                          'v': 'V',
@@ -145,7 +152,7 @@ class Device:
         # loads file from file locaton. This should calc i, j, v, and area for every curve.
         def loadfile(self, filelocation):
             
-            #set self.vector to 1 to let program know vectors have been analyzed
+            #set self.vector to 1 to let program know loadvalues have been calc
             self.load = 1
             
             # get current folder and file location, split location into folder and file name, move into filefolder
@@ -241,11 +248,25 @@ class Device:
                 # calculate PCE
                 self.pce = self.ff * self.jsc * self.voc / 100
         
+# Ignore this for now!        
+        # takes in list of scalar variables (e.g. ff, rs) returns a list of parameter values
+#        def getparamvalsold(self, inputvallist):
+#            if inputvallist[0].find('all') != -1:
+#                returnstring = [0]*len(self.scalarlist)
+#                for ii, item in enumerate(self.scalarlist):
+#                    returnstring[ii]=eval('self.' + item)
+#            else:
+#                returnstring = np.zeros(len(inputvallist))
+#                for ii, item in enumerate(inputvallist):
+#                    returnstring[ii] = eval('self.' + item)
+#            return returnstring
+        
         
         # takes in list of scalar variables (e.g. ff, rs) returns a list of parameter values
+        # the change here is that it outputs data with 1 row and many columns, rather than many rows and 1 column. 
         def getparamvals(self, inputvallist):
             if inputvallist[0].find('all') != -1:
-                returnstring = [0]*len(self.scalarlist)
+                returnstring = np.zeros(0,len(self.scalarlist))
                 for ii, item in enumerate(self.scalarlist):
                     returnstring[ii]=eval('self.' + item)
             else:
