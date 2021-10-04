@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 
 
@@ -52,6 +53,7 @@ class JVCurve:
         self.loadedlist = ['v','j','i','area']
         self.vectorlist = ['p']
         self.scalarlist = ['pce', 'jsc', 'voc', 'ff', 'jmp', 'vmp', 'pmp', 'rs', 'rsh', 'rch']
+        self.timelist = ['epoch_time','date_time','time24_time','time12_time']
 
         # list of variables to caplital variables (good for short hand in UI)
         self.Variable = {'i': 'I',
@@ -137,7 +139,11 @@ class JVCurve:
                      'rs': 'Ω/cm²',
                      'rsh': 'Ω/cm²',
                      'rch': 'Ω/cm'}
-
+        
+        self.TimeLabels = {'epoch_time':'EPOCH',
+                           'date_time':'Date',
+                           'time24_time':'Time',
+                           'time12_time': 'Time'}
 
     # loads file from file locaton. This should calc i, j, v, and area for every curve.
     def loadfile(self, filepath):
@@ -169,6 +175,12 @@ class JVCurve:
 
 # Note to Rishi: if self.j[np.argmin(np.abs(self.v))] < 0: will flag even if we dont cross 0. in this instance we want to flag only if it does
 
+    def loadtime(self,filepath):
+        # get load info for date, time, etc
+        self.epoch_time = os.path.getctime(self.filepath)
+        self.date_time = time.strftime("%m/%d/%Y",time.localtime(self.epoch_time))
+        self.time24_time = time.strftime("%H:%M:%S",time.localtime(self.epoch_time))
+        self.time12_time = time.strftime("%I:%M:%S %p",time.localtime(self.epoch_time))       
 
     # calc vectors: p
     def calcvectors(self):
